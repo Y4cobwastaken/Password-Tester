@@ -154,7 +154,7 @@ def analyze_password_strength(password):
     return score, feedback, strength
 
 def estimate_crack_time(password):
-    """Estimate time to crack password using brute force"""
+    """Estimate time to crack password using brute force with range"""
     
     # Determine character set size
     char_set_size = 0
@@ -177,23 +177,51 @@ def estimate_crack_time(password):
     password_length = len(password)
     total_combinations = char_set_size ** password_length
     
-    # Assume 1 billion attempts per second (modern hardware)
-    attempts_per_second = 1_000_000_000
+    # Different attack scenarios
+    # Fast attack: 10 billion attempts per second (advanced hardware/GPU)
+    # Average attack: 1 billion attempts per second (modern hardware)
+    # Slow attack: 100 million attempts per second (basic hardware)
+    fast_attempts = 10_000_000_000
+    avg_attempts = 1_000_000_000
+    slow_attempts = 100_000_000
     
-    # Average time is half of total combinations
-    avg_seconds = total_combinations / (2 * attempts_per_second)
+    # Calculate times for different scenarios
+    # Best case: password found immediately
+    # Average case: password found after checking half the combinations
+    # Worst case: password is the last one checked
     
-    # Convert to readable format
-    if avg_seconds < 60:
-        return f"{avg_seconds:.2f} seconds"
-    elif avg_seconds < 3600:
-        return f"{avg_seconds/60:.2f} minutes"
-    elif avg_seconds < 86400:
-        return f"{avg_seconds/3600:.2f} hours"
-    elif avg_seconds < 31536000:
-        return f"{avg_seconds/86400:.2f} days"
+    def format_time(seconds):
+        if seconds < 60:
+            return f"{seconds:.2f} seconds"
+        elif seconds < 3600:
+            return f"{seconds/60:.2f} minutes"
+        elif seconds < 86400:
+            return f"{seconds/3600:.2f} hours"
+        elif seconds < 31536000:
+            return f"{seconds/86400:.2f} days"
+        else:
+            return f"{seconds/31536000:.2f} years"
+    
+    # Calculate range using average hardware
+    instant = 0  # Best case - found immediately
+    average_time = total_combinations / (2 * avg_attempts)  # Average case
+    worst_case = total_combinations / avg_attempts  # Worst case
+    
+    # Also show fast attack scenario for comparison
+    fast_average = total_combinations / (2 * fast_attempts)
+    
+    # Format the range
+    if average_time < 1:
+        return "Instantly to a few seconds"
+    elif average_time == worst_case:
+        return format_time(average_time)
     else:
-        return f"{avg_seconds/31536000:.2f} years"
+        avg_formatted = format_time(average_time)
+        worst_formatted = format_time(worst_case)
+        fast_formatted = format_time(fast_average)
+        
+        # Return a range showing different scenarios
+        return f"{avg_formatted} to {worst_formatted} (avg to worst case)\n                         Fast attack: {fast_formatted} average"
 
 def get_password_suggestions(feedback):
     """Provide specific suggestions based on analysis"""
@@ -373,7 +401,7 @@ def main():
         print(f"Password Length: {len(password)} characters")
         print(f"Strength Score: {score}/10")
         print(f"Strength Level: {strength}")
-        print(f"Estimated Crack Time: {crack_time}")
+        print(f"Estimated Crack Time Range: {crack_time}")
         
         print(f"\n📝 Detailed Analysis:")
         for item in feedback:
@@ -394,6 +422,11 @@ def main():
         special_chars = string.punctuation + ' '
         special_count = sum(1 for char in password if char in special_chars)
         print(f"  Special: {special_count}")
+        
+        print(f"\n⚡ Attack Scenarios:")
+        print(f"  • Basic hardware: ~100M attempts/sec")
+        print(f"  • Modern hardware: ~1B attempts/sec") 
+        print(f"  • Advanced/GPU: ~10B attempts/sec")
         
         # Ask if user wants to generate a PDF report
         generate_report = input("\n📄 Would you like to generate a PDF report? (y/n): ").lower().strip()
