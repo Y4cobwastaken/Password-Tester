@@ -401,7 +401,21 @@ def main():
         print(f"Password Length: {len(password)} characters")
         print(f"Strength Score: {score}/10")
         print(f"Strength Level: {strength}")
-        print(f"Estimated Crack Time Range: {crack_time}")
+        print(f"Estimated Crack Time:")
+        # Parse the crack time to format it properly
+        if "to" in crack_time and "Fast attack:" in crack_time:
+            lines = crack_time.split('\n')
+            main_range = lines[0].replace(" (avg to worst case)", "")
+            fast_attack = lines[1].strip().replace("Fast attack: ", "").replace(" average", "")
+            
+            range_parts = main_range.split(" to ")
+            if len(range_parts) == 2:
+                print(f"  Range: {range_parts[0]} - {range_parts[1]}")
+                print(f"  Fast attack: {fast_attack}")
+            else:
+                print(f"  {crack_time}")
+        else:
+            print(f"  {crack_time}")
         
         print(f"\n📝 Detailed Analysis:")
         for item in feedback:
