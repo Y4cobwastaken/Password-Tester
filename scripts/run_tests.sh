@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 # Password Strength Tester - Test Runner Script
