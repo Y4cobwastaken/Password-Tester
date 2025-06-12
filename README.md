@@ -28,7 +28,7 @@ A comprehensive Python tool for analyzing password security with detailed report
 ### Installation
 ```bash
 # Clone and install dependencies
-git clone <your-repo-url>
+git clone https://github.com/Y4cobwastaken/Password-Tester
 cd password-strength-tester
 pip install -r requirements.txt
 ```
